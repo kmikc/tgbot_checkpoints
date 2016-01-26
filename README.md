@@ -1,2 +1,1 @@
-# tgbot_checkpoints
-Telegram Bot: Checkpoints
+# tg-ingress-cp-bot
