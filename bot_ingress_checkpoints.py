@@ -32,7 +32,7 @@ def echo_all(message):
 
     if len(revise_message) > 0:
         _init_cycle = datetime.strptime('2015-06-24 07:00', '%Y-%m-%d %H:%M')
-        _now = datetime.now() - timedelta(hours=4)
+        _now = datetime.now()
 
         messages = []
         revise_ciclo = [find_text for find_text in mensajes_ciclo if find_text in text.lower()]
