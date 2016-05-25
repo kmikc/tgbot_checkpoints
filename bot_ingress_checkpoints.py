@@ -31,8 +31,8 @@ def echo_all(message):
     revise_message = [find_text for find_text in all_messages if find_text in text.lower()]
 
     if len(revise_message) > 0:
-        _init_cycle = datetime.strptime('2015-06-24 07:00', '%Y-%m-%d %H:%M')
-        _now = datetime.now()
+        _init_cycle = datetime.strptime('2015-06-24 06:00', '%Y-%m-%d %H:%M') # Cambié de 07:00 a 06:00 para arreglar la diferencia que aun sigue existiendo mienstras no se configure bien el timezone
+        _now = datetime.now() # Saqué el delta -4, ya que configuré el timezone en la RaspberryPi
 
         messages = []
         revise_ciclo = [find_text for find_text in mensajes_ciclo if find_text in text.lower()]
