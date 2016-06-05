@@ -4,6 +4,7 @@ import telebot
 import logging
 from unicodedata import normalize
 from datetime import datetime, timedelta
+from time import mktime
 
 bot = telebot.TeleBot("140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY")
 
@@ -11,9 +12,32 @@ bot = telebot.TeleBot("140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY")
 # COMANDOS
 #
 
-@bot.message_handler(commands=['start', 'help'])
+@bot.message_handler(commands=['help', 'gmt', 'checkpoints'])
 def send_welcome(message):
-    bot.reply_to(message, "Holi, no hay nada aqui todavía =)")
+
+    if 'help' in message.text:
+        bot.reply_to(message, "Por ahora con solo escribir 'proximo cp', 'fin de ciclo' o similares, se mostrará la fecha y hora")
+
+    elif 'gmt' in message.text:
+        bot.reply_to(message, "Para configurar la zona horaria")
+
+    elif 'checkpoints' in message.text:
+        t0 = datetime.strptime('2014-07-09 11', '%Y-%m-%d %H')
+        hours_per_cycle = 175
+
+        t = datetime.now()
+
+        seconds = mktime(t.timetuple()) - mktime(t0.timetuple())
+        cycles = seconds // (3600 * hours_per_cycle)
+        start = t0 + timedelta(hours=cycles * hours_per_cycle)
+        checkpoints = map(lambda x: start + timedelta(hours=x), range(0, hours_per_cycle, 5))
+
+        acheckpoints = []
+        for num, checkpoint in enumerate(checkpoints):
+            acheckpoints.append(format(str(checkpoint)))
+
+        res = ' \n '.join(acheckpoints)
+        bot.reply_to(message, res)
 
 #
 # FILTRAR MENSAJES "proximo cp"... etc.
