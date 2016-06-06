@@ -5,6 +5,8 @@ import logging
 from unicodedata import normalize
 from datetime import datetime, timedelta
 from time import mktime
+import sqlite3 as lite
+import sys
 
 bot = telebot.TeleBot("140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY")
 
@@ -19,7 +21,33 @@ def send_welcome(message):
         bot.reply_to(message, "Por ahora con solo escribir 'proximo cp', 'fin de ciclo' o similares, se mostrará la fecha y hora")
 
     elif 'gmt' in message.text:
-        bot.reply_to(message, "Para configurar la zona horaria")
+        #var_gmt = sys.argv[1]
+        try:
+            var_gmt = int(message.text.replace("/gmt ", ""))
+            ok = True
+
+        except:
+            resp = "Valor no numérico"
+            ok = False
+
+        if ok:
+            conn = None
+            try:
+                conn = lite.connect('gmt.db')
+                cur = conn.cursor()
+                cur.execute("INSERT INTO chat_gmt (chat_id, gmt_value) VALUES (?, ?)", (message.chat.id, var_gmt))
+                conn.commit()
+
+                resp = 'Conectado'
+            
+            except:
+                resp = 'No se pudo conectar'
+            
+            finally:
+                if conn:
+                    conn.close()
+
+        bot.reply_to(message, resp)
 
     elif 'checkpoints' in message.text:
         t0 = datetime.strptime('2014-07-09 11', '%Y-%m-%d %H')
