@@ -64,7 +64,7 @@ def send_welcome(message):
         acheckpoints = []
         for num, checkpoint in enumerate(checkpoints):
             if checkpoint > t and nextcp_mark == False:
-                acheckpoints.append(format(str(checkpoint))), ' <---'
+                acheckpoints.append(format(str(checkpoint), ' <---'))
                 nextcp_mark = True
             else:
                 acheckpoints.append(format(str(checkpoint)))
