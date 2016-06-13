@@ -39,10 +39,10 @@ def send_welcome(message):
                 conn.commit()
 
                 resp = 'Conectado'
-            
+
             except:
                 resp = 'No se pudo conectar'
-            
+
             finally:
                 if conn:
                     conn.close()
@@ -59,10 +59,15 @@ def send_welcome(message):
         cycles = seconds // (3600 * hours_per_cycle)
         start = t0 + timedelta(hours=cycles * hours_per_cycle)
         checkpoints = map(lambda x: start + timedelta(hours=x), range(0, hours_per_cycle, 5))
+        nextcp_mark = False
 
         acheckpoints = []
         for num, checkpoint in enumerate(checkpoints):
-            acheckpoints.append(format(str(checkpoint)))
+            if checkpoint > t and nextcp_mark == False:
+                acheckpoints.append(format(str(checkpoint))), ' <---'
+                nextcp_mark = True
+            else:
+                acheckpoints.append(format(str(checkpoint)))
 
         res = ' \n '.join(acheckpoints)
         bot.reply_to(message, res)
