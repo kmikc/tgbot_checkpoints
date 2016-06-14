@@ -63,11 +63,15 @@ def send_welcome(message):
 
         acheckpoints = []
         for num, checkpoint in enumerate(checkpoints):
+
             if checkpoint > t and nextcp_mark == False:
-                acheckpoints.append(format(str(checkpoint)), ' <---')
+                str_checkpoint = format(str(checkpoint)) + ' <---'
                 nextcp_mark = True
             else:
-                acheckpoints.append(format(str(checkpoint)))
+                str_checkpoint = format(str(checkpoint))
+
+            acheckpoints.append(str_checkpoint)
+
 
         res = ' \n '.join(acheckpoints)
         bot.reply_to(message, res)
@@ -81,15 +85,16 @@ def echo_all(message):
     logging.basicConfig(filename='bot_ingress_checkpoints.log', filemode='w', level=logging.DEBUG)
     logging.info(message)
 
-    text = message.text
+    #text = message.text
+    text = normalize('NFKD', message.text).encode('ASCII', 'ignore')
     mensajes_cp = [u'proximo cp', u'siguiente cp', u'proximo checkpoint', u'siguiente checkpoint', u'proximo check point', u'siguiente check point']
     mensajes_ciclo = [u'fin de ciclo', u'fin del ciclo', u'final de ciclo', u'final del ciclo', u'proximo ciclo', u'siguiente ciclo', u'ciclo nuevo', u'nuevo ciclo']
     all_messages = mensajes_cp + mensajes_ciclo
     revise_message = [find_text for find_text in all_messages if find_text in text.lower()]
 
     if len(revise_message) > 0:
-        _init_cycle = datetime.strptime('2015-06-24 06:00', '%Y-%m-%d %H:%M') # Cambié de 07:00 a 06:00 para arreglar la diferencia que aun sigue existiendo mienstras no se configure bien el timezone
-        _now = datetime.now() # Saqué el delta -4, ya que configuré el timezone en la RaspberryPi
+        _init_cycle = datetime.strptime('2015-06-24 06:00', '%Y-%m-%d %H:%M')
+        _now = datetime.now()
 
         messages = []
         revise_ciclo = [find_text for find_text in mensajes_ciclo if find_text in text.lower()]
