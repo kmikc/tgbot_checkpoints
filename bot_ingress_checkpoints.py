@@ -130,4 +130,10 @@ def echo_all(message):
         _respuesta = msg.encode('utf-8')
         bot.reply_to(message, _respuesta)
 
-bot.polling()
+
+try:
+    bot.polling(none_stop=True)
+except:
+    print 'Error!'
+    sys.exit("Finalizando...")
+
