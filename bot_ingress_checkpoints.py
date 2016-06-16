@@ -35,10 +35,21 @@ def send_welcome(message):
             try:
                 conn = lite.connect('gmt.db')
                 cur = conn.cursor()
-                cur.execute("INSERT INTO chat_gmt (chat_id, gmt_value) VALUES (?, ?)", (message.chat.id, var_gmt))
-                conn.commit()
 
-                resp = 'Conectado'
+                # Cuenta regstros existentes
+                cur.execute("SELECT COUNT(*) FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
+                row_count = cur.fetchone()[0]
+
+                # SegÃn resultado obtenido, actualiza o inserta
+                if row_count > 0:
+                    bot.reply_to(message, 'UPDATE')
+                    # TO DO!!!!
+                    resp = 'Registro actualizado'
+                else:
+                    bot.reply_to(message, 'INSERT')
+                    cur.execute("INSERT INTO chat_gmt (chat_id, gmt_value) VALUES (?, ?)", (message.chat.id, var_gmt))
+                    conn.commit()
+                    resp = 'Registro ingresado'
 
             except:
                 resp = 'No se pudo conectar'
@@ -82,8 +93,8 @@ def send_welcome(message):
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
-    logging.basicConfig(filename='bot_ingress_checkpoints.log', filemode='w', level=logging.DEBUG)
-    logging.info(message)
+    #logging.basicConfig(filename='bot_ingress_checkpoints.log', filemode='w', level=logging.DEBUG)
+    #logging.info(message)
 
     #text = message.text
     text = normalize('NFKD', message.text).encode('ASCII', 'ignore')
@@ -131,9 +142,10 @@ def echo_all(message):
         bot.reply_to(message, _respuesta)
 
 
-try:
-    bot.polling(none_stop=True)
-except:
-    print 'Error!'
-    sys.exit("Finalizando...")
+#try:
+bot.polling(none_stop=True)
+#bot.polling()
+#except:
+#    print 'Error!'
+#    sys.exit("Finalizando...")
 
