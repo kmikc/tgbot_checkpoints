@@ -142,10 +142,9 @@ def echo_all(message):
         bot.reply_to(message, _respuesta)
 
 
-#try:
-bot.polling(none_stop=True)
-#bot.polling()
-#except:
-#    print 'Error!'
-#    sys.exit("Finalizando...")
-
+while True:
+    try:
+        bot.polling(none_stop=True)
+    except request.exceptions.ConnectionError as e:
+        print >> sys.stderr, str(e)
+        time.sleep(15)
