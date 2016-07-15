@@ -142,9 +142,11 @@ def echo_all(message):
         bot.reply_to(message, _respuesta)
 
 
-while True:
-    try:
-        bot.polling(none_stop=True)
-    except request.exceptions.ConnectionError as e:
-        print >> sys.stderr, str(e)
-        time.sleep(15)
+#while True:
+#    try:
+#        bot.polling(none_stop=True)
+#    except request.exceptions.ConnectionError as e:
+#        print >> sys.stderr, str(e)
+#        time.sleep(15)
+
+bot.polling(non_stop=True)
