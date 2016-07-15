@@ -149,4 +149,4 @@ def echo_all(message):
 #        print >> sys.stderr, str(e)
 #        time.sleep(15)
 
-bot.polling(non_stop=True)
+bot.polling(none_stop=True)
