@@ -61,7 +61,13 @@ def send_welcome(message):
         bot.reply_to(message, resp)
 
     elif 'checkpoints' in message.text:
-        t0 = datetime.strptime('2014-07-09 11', '%Y-%m-%d %H')
+        # En horario de verano cambio a 2014-07-09 12
+        # En horario de invierno cambio a 2014-07-09 11
+        # TO DO:
+        # Fijar la hora en GMT+0 (2014-07-29 15)
+        # ...y obtener la diferencia según el dato guardado en la tabla chat_gmt
+        # ...verificar que exista el dato "gmt" antes de hacer el cálculo de la hora
+        t0 = datetime.strptime('2014-07-09 12', '%Y-%m-%d %H')
         hours_per_cycle = 175
 
         t = datetime.now()
@@ -104,7 +110,13 @@ def echo_all(message):
     revise_message = [find_text for find_text in all_messages if find_text in text.lower()]
 
     if len(revise_message) > 0:
-        _init_cycle = datetime.strptime('2015-06-24 06:00', '%Y-%m-%d %H:%M')
+        # En horario de verano cambio a 2015-06-24 07:00
+        # En horario de invierno cambio a 2015-06-24 06:00
+        # TO DO:
+        # Fijar la hora en GMT+0 (2015-06-24 10:00)
+        # ...y obtener la diferencia según el dato guardado en la tabla chat_gmt
+        # ...verificar que exista el dato "gmt" antes de hacer el cálculo de la hora
+        _init_cycle = datetime.strptime('2015-06-24 07:00', '%Y-%m-%d %H:%M')
         _now = datetime.now()
 
         messages = []
