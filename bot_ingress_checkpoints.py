@@ -72,6 +72,8 @@ def send_welcome(message):
         gmt_value = cur.fetchone()[0]
         conn.close()
         bot.reply_to(message, gmt_value)
+        if gmt_value is None:
+            gmt_value = 0
 
         #t0 = datetime.strptime('2014-07-09 12', '%Y-%m-%d %H')
         t0 = datetime.strptime('2014-07-09 15', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
@@ -129,6 +131,8 @@ def echo_all(message):
         gmt_value = cur.fetchone()[0]
         conn.close()
         bot.reply_to(message, gmt_value)
+        if gmt_value is None:
+            gmt_value = 0
 
         #_init_cycle = datetime.strptime('2015-06-24 07:00', '%Y-%m-%d %H:%M')
         _init_cycle = datetime.strptime('2015-06-24 10:00', '%Y-%m-%d %H:%M') + timedelta(hours=gmt_value)
