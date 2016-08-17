@@ -73,7 +73,8 @@ def send_welcome(message):
         conn.close()
         bot.reply_to(message, gmt_value)
 
-        t0 = datetime.strptime('2014-07-09 12', '%Y-%m-%d %H')
+        #t0 = datetime.strptime('2014-07-09 12', '%Y-%m-%d %H')
+        t0 = datetime.strptime('2014-07-09 15', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
         hours_per_cycle = 175
 
         t = datetime.now()
@@ -129,7 +130,8 @@ def echo_all(message):
         conn.close()
         bot.reply_to(message, gmt_value)
 
-        _init_cycle = datetime.strptime('2015-06-24 07:00', '%Y-%m-%d %H:%M')
+        #_init_cycle = datetime.strptime('2015-06-24 07:00', '%Y-%m-%d %H:%M')
+        _init_cycle = datetime.strptime('2015-06-24 10:00', '%Y-%m-%d %H:%M') + timedelta(hours=gmt_value)
         _now = datetime.now()
 
         messages = []
