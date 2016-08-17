@@ -122,6 +122,13 @@ def echo_all(message):
         # Fijar la hora en GMT+0 (2015-06-24 10:00)
         # ...y obtener la diferencia seg�n el dato guardado en la tabla chat_gmt
         # ...verificar que exista el dato "gmt" antes de hacer el c�lculo de la hora
+        conn = lite.connect('gmt.db')
+        cur = conn.cursor()
+        cur.execute("SELECT gmt_value FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
+        gmt_value = cur.fetchone()[0]
+        conn.close()
+        bot.reply_to(message, gmt_value)
+
         _init_cycle = datetime.strptime('2015-06-24 07:00', '%Y-%m-%d %H:%M')
         _now = datetime.now()
 
