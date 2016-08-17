@@ -43,7 +43,6 @@ def send_welcome(message):
                 # Seg�n resultado obtenido, actualiza o inserta
                 if row_count > 0:
                     bot.reply_to(message, 'UPDATE')
-                    # TO DO!!!!
                     cur.execute("UPDATE chat_gmt SET gmt_value=? WHERE chat_id=?", (var_gmt, message.chat.id))
                     conn.commit()
                     resp = 'Registro actualizado'
@@ -69,6 +68,12 @@ def send_welcome(message):
         # Fijar la hora en GMT+0 (2014-07-29 15)
         # ...y obtener la diferencia seg�n el dato guardado en la tabla chat_gmt
         # ...verificar que exista el dato "gmt" antes de hacer el c�lculo de la hora
+        conn = lite.connect('gmt.db')
+        cur.execute("SELECT var_gmt FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
+        gmt_value = cur.fetchone()[0]
+        conn.close()
+        bot.reply_to(message, gmt_value)
+
         t0 = datetime.strptime('2014-07-09 12', '%Y-%m-%d %H')
         hours_per_cycle = 175
 
