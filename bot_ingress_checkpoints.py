@@ -44,7 +44,7 @@ def send_welcome(message):
                 if row_count > 0:
                     bot.reply_to(message, 'UPDATE')
                     # TO DO!!!!
-                    cur.execute("UPDATE chat_gmt SET gmt_value=? WHERE chat_id=?", (message.chat.id))
+                    cur.execute("UPDATE chat_gmt SET gmt_value=? WHERE chat_id=?", (var_gmt, message.chat.id))
                     conn.commit()
                     resp = 'Registro actualizado'
                 else:
