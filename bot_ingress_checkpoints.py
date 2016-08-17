@@ -68,12 +68,15 @@ def send_welcome(message):
         # ...verificar que exista el dato "gmt" antes de hacer el c�lculo de la hora
         conn = lite.connect('gmt.db')
         cur = conn.cursor()
-        cur.execute("SELECT gmt_value FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
-        gmt_value = cur.fetchone()[0]
+        cur.execute("SELECT COUNT(*) FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
+        gmt_value_count = cur.fetchone()[0]
+        if gmt_value_count > 0:
+            cur.execute("SELECT gmt_value FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
+            gmt_value = cur.fetchone()[0]
+        else:
+            gmt_value = 0
         conn.close()
         bot.reply_to(message, gmt_value)
-        if gmt_value is None:
-            gmt_value = 0
 
         #t0 = datetime.strptime('2014-07-09 12', '%Y-%m-%d %H')
         t0 = datetime.strptime('2014-07-09 15', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
@@ -127,12 +130,15 @@ def echo_all(message):
         # ...verificar que exista el dato "gmt" antes de hacer el c�lculo de la hora
         conn = lite.connect('gmt.db')
         cur = conn.cursor()
-        cur.execute("SELECT gmt_value FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
-        gmt_value = cur.fetchone()[0]
+        cur.execute("SELECT COUNT(*) FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
+        gmt_value_count = cur.fetchone()[0]
+        if gmt_value_count > 0:
+            cur.execute("SELECT gmt_value FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
+            gmt_value = cur.fetchone()[0]
+        else:
+            gmt_value = 0
         conn.close()
         bot.reply_to(message, gmt_value)
-        if gmt_value is None:
-            gmt_value = 0
 
         #_init_cycle = datetime.strptime('2015-06-24 07:00', '%Y-%m-%d %H:%M')
         _init_cycle = datetime.strptime('2015-06-24 10:00', '%Y-%m-%d %H:%M') + timedelta(hours=gmt_value)
