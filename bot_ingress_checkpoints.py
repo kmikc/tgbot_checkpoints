@@ -40,10 +40,12 @@ def send_welcome(message):
                 cur.execute("SELECT COUNT(*) FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
                 row_count = cur.fetchone()[0]
 
-                # SegÃn resultado obtenido, actualiza o inserta
+                # Segï¿½n resultado obtenido, actualiza o inserta
                 if row_count > 0:
                     bot.reply_to(message, 'UPDATE')
                     # TO DO!!!!
+                    cur.execute("UPDATE chat_gmt SET gmt_value=? WHERE chat_id=?", (message.chat.id))
+                    conn.commit()
                     resp = 'Registro actualizado'
                 else:
                     bot.reply_to(message, 'INSERT')
@@ -65,8 +67,8 @@ def send_welcome(message):
         # En horario de invierno cambio a 2014-07-09 11
         # TO DO:
         # Fijar la hora en GMT+0 (2014-07-29 15)
-        # ...y obtener la diferencia según el dato guardado en la tabla chat_gmt
-        # ...verificar que exista el dato "gmt" antes de hacer el cálculo de la hora
+        # ...y obtener la diferencia segï¿½n el dato guardado en la tabla chat_gmt
+        # ...verificar que exista el dato "gmt" antes de hacer el cï¿½lculo de la hora
         t0 = datetime.strptime('2014-07-09 12', '%Y-%m-%d %H')
         hours_per_cycle = 175
 
@@ -114,8 +116,8 @@ def echo_all(message):
         # En horario de invierno cambio a 2015-06-24 06:00
         # TO DO:
         # Fijar la hora en GMT+0 (2015-06-24 10:00)
-        # ...y obtener la diferencia según el dato guardado en la tabla chat_gmt
-        # ...verificar que exista el dato "gmt" antes de hacer el cálculo de la hora
+        # ...y obtener la diferencia segï¿½n el dato guardado en la tabla chat_gmt
+        # ...verificar que exista el dato "gmt" antes de hacer el cï¿½lculo de la hora
         _init_cycle = datetime.strptime('2015-06-24 07:00', '%Y-%m-%d %H:%M')
         _now = datetime.now()
 
