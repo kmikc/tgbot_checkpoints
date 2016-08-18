@@ -10,7 +10,7 @@ import sys
 
 bot = telebot.TeleBot("140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY")
 
-def get_gmt (p_chat_id):
+def get_gmt(p_chat_id):
     conn = lite.connect('gmt.db')
     cur = conn.cursor()
     cur.execute("SELECT COUNT(*) FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": p_chat_id})
@@ -21,7 +21,9 @@ def get_gmt (p_chat_id):
     else:
         gmt_value = 0
     conn.close()
-    bot.reply_to(message, gmt_value)
+
+    return gmt_value
+
 
 #
 # COMANDOS
@@ -79,7 +81,8 @@ def send_welcome(message):
         # Fijar la hora en GMT+0 (2014-07-29 15)
         # ...y obtener la diferencia seg�n el dato guardado en la tabla chat_gmt
         # ...verificar que exista el dato "gmt" antes de hacer el c�lculo de la hora
-        get_gmt(message.chat.id)
+        gmt_value = get_gmt(message.chat.id)
+        bot.reply_to(message, gmt_value)
 
         #t0 = datetime.strptime('2014-07-09 12', '%Y-%m-%d %H')
         t0 = datetime.strptime('2014-07-09 15', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
