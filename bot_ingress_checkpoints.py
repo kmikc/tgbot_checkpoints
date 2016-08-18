@@ -10,7 +10,7 @@ import sys
 
 bot = telebot.TeleBot("140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY")
 
-def get_gmt(p_chat_id):
+def get_gmt(p_chat_id, p_chat_title, p_chat_username):
     conn = lite.connect('gmt.db')
     cur = conn.cursor()
     cur.execute("SELECT COUNT(*) FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": p_chat_id})
@@ -20,6 +20,9 @@ def get_gmt(p_chat_id):
         gmt_value = cur.fetchone()[0]
     else:
         gmt_value = 0
+
+    cur.execute("UPDATE chat_gmt SET chat_title=? , chat_username=? WHERE chat_id=?", (p_chat_title, p_chat_username, p_chat_id))
+    conn.commit()
     conn.close()
 
     return gmt_value
@@ -36,7 +39,6 @@ def send_welcome(message):
         bot.reply_to(message, "Por ahora con solo escribir 'proximo cp', 'fin de ciclo' o similares, se mostrará la fecha y hora")
 
     elif 'gmt' in message.text:
-        #var_gmt = sys.argv[1]
         try:
             var_gmt = int(message.text.replace("/gmt ", ""))
             ok = True
@@ -75,16 +77,7 @@ def send_welcome(message):
         bot.reply_to(message, resp)
 
     elif 'checkpoints' in message.text:
-        # En horario de verano cambio a 2014-07-09 12
-        # En horario de invierno cambio a 2014-07-09 11
-        # TO DO:
-        # Fijar la hora en GMT+0 (2014-07-29 15)
-        # ...y obtener la diferencia seg�n el dato guardado en la tabla chat_gmt
-        # ...verificar que exista el dato "gmt" antes de hacer el c�lculo de la hora
-        gmt_value = get_gmt(message.chat.id)
-        bot.reply_to(message, gmt_value)
-
-        #t0 = datetime.strptime('2014-07-09 12', '%Y-%m-%d %H')
+        gmt_value = get_gmt(message.chat.id, message.chat.title, message.chat.username)
         t0 = datetime.strptime('2014-07-09 15', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
         hours_per_cycle = 175
 
@@ -128,25 +121,7 @@ def echo_all(message):
     revise_message = [find_text for find_text in all_messages if find_text in text.lower()]
 
     if len(revise_message) > 0:
-        # En horario de verano cambio a 2015-06-24 07:00
-        # En horario de invierno cambio a 2015-06-24 06:00
-        # TO DO:
-        # Fijar la hora en GMT+0 (2015-06-24 10:00)
-        # ...y obtener la diferencia seg�n el dato guardado en la tabla chat_gmt
-        # ...verificar que exista el dato "gmt" antes de hacer el c�lculo de la hora
-        conn = lite.connect('gmt.db')
-        cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
-        gmt_value_count = cur.fetchone()[0]
-        if gmt_value_count > 0:
-            cur.execute("SELECT gmt_value FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": message.chat.id})
-            gmt_value = cur.fetchone()[0]
-        else:
-            gmt_value = 0
-        conn.close()
-        bot.reply_to(message, gmt_value)
-
-        #_init_cycle = datetime.strptime('2015-06-24 07:00', '%Y-%m-%d %H:%M')
+        gmt_value = get_gmt(message.chat.id, message.chat.title, message.chat.username)
         _init_cycle = datetime.strptime('2015-06-24 10:00', '%Y-%m-%d %H:%M') + timedelta(hours=gmt_value)
         _now = datetime.now()
 
