@@ -21,7 +21,7 @@ def get_gmt(p_chat_id, p_chat_title, p_chat_username):
     else:
         gmt_value = 0
 
-    cur.execute("UPDATE chat_gmt SET chat_title=? , chat_username=? , datetime=now() WHERE chat_id=?", (p_chat_title, p_chat_username, p_chat_id))
+    cur.execute("UPDATE chat_gmt SET chat_title=? , chat_username=? , datetime=datetime(CURRENT_TIMESTAMP, 'localtime') WHERE chat_id=?", (p_chat_title, p_chat_username, p_chat_id))
     conn.commit()
     conn.close()
 
