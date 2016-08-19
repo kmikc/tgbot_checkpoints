@@ -20,6 +20,8 @@ def get_gmt(p_chat_id, p_chat_title, p_chat_username):
         gmt_value = cur.fetchone()[0]
     else:
         gmt_value = 0
+        cur.execute("INSERT INTO chat_gmt (chat_id, gmt_value) VALUES (?, ?)", (p_chat_id, gmt_value))
+        conn.commit()
 
     cur.execute("UPDATE chat_gmt SET chat_title=? , chat_username=? , datetime=datetime(CURRENT_TIMESTAMP, 'localtime') WHERE chat_id=?", (p_chat_title, p_chat_username, p_chat_id))
     conn.commit()
