@@ -5,6 +5,10 @@ from telegram.ext import Updater, CommandHandler
 import sqlite3 as lite
 
 '''
+
+Una muestra de como viene el parámetro 'update'
+para obtener, por ejemplo el chat id --> update.message.chat.id
+
 {
     'message': {
         'migrate_to_chat_id': 0,
@@ -96,8 +100,10 @@ def checkpoints(bot, update):
     str_result = '=)'
     update.message.reply_text(str_result)
 
+# TOKEN
 updater = Updater('140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY')
 
+# COMANDOS
 updater.dispatcher.add_handler(CommandHandler('start', start))
 updater.dispatcher.add_handler(CommandHandler('help', help))
 updater.dispatcher.add_handler(CommandHandler('gmt', gmt, pass_args=True))
