@@ -70,20 +70,20 @@ def gmt(bot, update, args):
     if ok:
         conn = None
         try:
-            conn = lite.connect('gmt.db')
+            conn = lite.connect('checkpoint_settings.db')
             cur = conn.cursor()
 
             # Cuenta regstros existentes
-            cur.execute("SELECT COUNT(*) FROM chat_gmt WHERE chat_id=:CHATID", {"CHATID": update.message.chat.id})
+            cur.execute("SELECT COUNT(*) FROM chat_settings WHERE chat_id=:CHATID", {"CHATID": update.message.chat.id})
             row_count = cur.fetchone()[0]
 
             # Seg�n resultado obtenido, actualiza o inserta
             if row_count > 0:
-                cur.execute("UPDATE chat_gmt SET gmt_value=? WHERE chat_id=?", (var_gmt, update.message.chat.id))
+                cur.execute("UPDATE chat_settings SET gmt_value=? WHERE chat_id=?", (var_gmt, update.message.chat.id))
                 conn.commit()
                 str_result = 'Registro actualizado'
             else:
-                cur.execute("INSERT INTO chat_gmt (chat_id, gmt_value) VALUES (?, ?)", (update.message.chat.id, var_gmt))
+                cur.execute("INSERT INTO chat_settings (chat_id, gmt_value) VALUES (?, ?)", (update.message.chat.id, var_gmt))
                 conn.commit()
                 str_result = 'Registro ingresado'
 
