@@ -50,8 +50,23 @@ para obtener, por ejemplo el chat id --> update.message.chat.id
 }
 '''
 
-def start(bot, update):
-    update.message.reply_text('Oli')
+def get_chat_timezone(p_chat_id):
+    query = "SELECT timezone FROM chat_settings WHERE chat_id={CHATID};".format(CHATID=p_chat_id)
+
+    conn = lite.connect('checkpoint_settings.db')
+    cur = conn.cursor()
+    cur.execute(query)
+    str_timezone = cur.fetchone()
+
+    str_timezone = str_timezone[0]
+    conn.commit()
+    conn.close()
+
+    return str_timezone
+
+def info(bot, update):
+    chat_id = update.message.chat.id
+    update.message.reply_text(get_chat_timezone(chat_id))
 
 def help(bot, update):
     str_result = '=)'
@@ -104,7 +119,7 @@ def checkpoints(bot, update):
 updater = Updater('140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY')
 
 # COMANDOS
-updater.dispatcher.add_handler(CommandHandler('start', start))
+updater.dispatcher.add_handler(CommandHandler('info', info))
 updater.dispatcher.add_handler(CommandHandler('help', help))
 updater.dispatcher.add_handler(CommandHandler('gmt', gmt, pass_args=True))
 updater.dispatcher.add_handler(CommandHandler('checkpoints', checkpoints))
