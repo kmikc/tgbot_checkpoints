@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from telegram.ext import Updater, CommandHandler
+from datetime import datetime, timedelta
+from time import mktime
 import sqlite3 as lite
 
 '''
@@ -64,13 +66,32 @@ def get_chat_timezone(p_chat_id):
 
     return str_timezone
 
+
+def get_chat_gmtvalue(p_chat_id):
+    query = "SELECT gmt_value FROM chat_settings WHERE chat_id={CHATID};".format(CHATID=p_chat_id)
+
+    conn = lite.connect('checkpoint_settings.db')
+    cur = conn.cursor()
+    cur.execute(query)
+    str_timezone = cur.fetchone()
+
+    str_timezone = str_timezone[0]
+    conn.commit()
+    conn.close()
+
+    return str_timezone
+
+
 def info(bot, update):
     chat_id = update.message.chat.id
-    update.message.reply_text(get_chat_timezone(chat_id))
+    update.message.reply_text("Timezone: " + str(get_chat_timezone(chat_id)))
+    update.message.reply_text("GMT: " + str(get_chat_gmtvalue(chat_id)))
+
 
 def help(bot, update):
     str_result = '=)'
     update.message.reply_text(str_result)
+
 
 def gmt(bot, update, args):
     str_result = 'args: {}'.format(args[0])
@@ -111,9 +132,39 @@ def gmt(bot, update, args):
 
     update.message.reply_text(str_result)
 
+
 def checkpoints(bot, update):
     str_result = '=)'
     update.message.reply_text(str_result)
+
+    chat_id = update.message.chat.id
+    gmt_value = get_chat_gmtvalue(chat_id)
+    t0 = datetime.strptime('2014-07-09 15', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
+    hours_per_cycle = 175
+
+    t = datetime.now()
+
+    seconds = mktime(t.timetuple()) - mktime(t0.timetuple())
+    cycles = seconds // (3600 * hours_per_cycle)
+    start = t0 + timedelta(hours=cycles * hours_per_cycle)
+    checkpoints = map(lambda x: start + timedelta(hours=x), range(0, hours_per_cycle, 5))
+    nextcp_mark = False
+
+    acheckpoints = []
+    for num, checkpoint in enumerate(checkpoints):
+
+        if checkpoint > t and nextcp_mark == False:
+            str_checkpoint = format(str(checkpoint)) + ' <---'
+            nextcp_mark = True
+        else:
+            str_checkpoint = format(str(checkpoint))
+
+        acheckpoints.append(str_checkpoint)
+
+
+    res = ' \n '.join(acheckpoints)
+    update.message.reply_text(res)
+
 
 # TOKEN
 updater = Updater('140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY')
