@@ -134,15 +134,17 @@ def gmt(bot, update, args):
 
 
 def checkpoints(bot, update):
-    str_result = '=)'
-    update.message.reply_text(str_result)
+    #str_result = '=)'
+    #update.message.reply_text(str_result)
 
     chat_id = update.message.chat.id
     gmt_value = get_chat_gmtvalue(chat_id)
-    t0 = datetime.strptime('2014-07-09 15', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
+    #t0 = datetime.strptime('2014-07-09 15', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
+    t0 = datetime.strptime('2017-02-26 03', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
     hours_per_cycle = 175
 
     t = datetime.now()
+    print t
 
     seconds = mktime(t.timetuple()) - mktime(t0.timetuple())
     cycles = seconds // (3600 * hours_per_cycle)
