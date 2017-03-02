@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, Job
 from datetime import datetime, timedelta
 from time import mktime
 import sqlite3 as lite
@@ -168,6 +168,39 @@ def checkpoints(bot, update):
     update.message.reply_text(res)
 
 
+def notify_checkpoint(bot, job):
+    l_chatid = get_enabled_chat_notification()
+    for k_chatid in l_chatid:
+        print "notify_checkpoint: " + str(k_chatid)
+        bot.sendMessage(chat_id=k_chatid, text="Oli")
+
+
+def get_enabled_chat_notification():
+    #chat_list = (37307558, -1001055036813)
+    query = "SELECT chat_id FROM chat_settings WHERE notify_cp = 1"
+    chat_list = []
+    print query
+
+    conn = lite.connect('checkpoint_settings.db')
+    cur = conn.cursor()
+    cur.execute(query)
+
+    while True:
+        row = cur.fetchone()
+
+        if not row:
+            break
+
+        print row[0]
+        chat_list.append(row)
+        print chat_list
+
+
+    conn.commit()
+    conn.close()
+
+    return chat_list
+
 # TOKEN
 updater = Updater('140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY')
 
@@ -176,6 +209,11 @@ updater.dispatcher.add_handler(CommandHandler('info', info))
 updater.dispatcher.add_handler(CommandHandler('help', help))
 updater.dispatcher.add_handler(CommandHandler('gmt', gmt, pass_args=True))
 updater.dispatcher.add_handler(CommandHandler('checkpoints', checkpoints))
+
+# JOB QUEUE
+#jobqueue = updater.job_queue
+#checkpoint_queue = Job(notify_checkpoint, 10.0)
+#jobqueue.put(checkpoint_queue, next_t=5.0)
 
 updater.start_polling()
 updater.idle()
