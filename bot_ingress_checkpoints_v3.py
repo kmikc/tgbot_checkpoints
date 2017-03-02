@@ -185,16 +185,12 @@ def get_enabled_chat_notification():
     cur = conn.cursor()
     cur.execute(query)
 
-    while True:
-        row = cur.fetchone()
+    rows = cur.fetchall()
+    for row_item in rows:
+        print row_item[0]
+        chat_list.append(row_item[0])
 
-        if not row:
-            break
-
-        print row[0]
-        chat_list.append(row)
-        print chat_list
-
+    print chat_list
 
     conn.commit()
     conn.close()
