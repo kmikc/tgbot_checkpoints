@@ -169,10 +169,16 @@ def checkpoints(bot, update):
 
 
 def notify_checkpoint(bot, job):
-    l_chatid = get_enabled_chat_notification()
-    for k_chatid in l_chatid:
-        print "notify_checkpoint: " + str(k_chatid)
-        bot.sendMessage(chat_id=k_chatid, text="Oli")
+    if check_checkpoint() == True:
+        l_chatid = get_enabled_chat_notification()
+        for k_chatid in l_chatid:
+            print "notify_checkpoint: " + str(k_chatid)
+            bot.sendMessage(chat_id=k_chatid, text="Oli")
+
+
+def check_checkpoint():
+    print datetime.now()
+    return False
 
 
 def get_enabled_chat_notification():
@@ -197,6 +203,7 @@ def get_enabled_chat_notification():
 
     return chat_list
 
+
 # TOKEN
 updater = Updater('140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY')
 
@@ -207,9 +214,9 @@ updater.dispatcher.add_handler(CommandHandler('gmt', gmt, pass_args=True))
 updater.dispatcher.add_handler(CommandHandler('checkpoints', checkpoints))
 
 # JOB QUEUE
-#jobqueue = updater.job_queue
-#checkpoint_queue = Job(notify_checkpoint, 10.0)
-#jobqueue.put(checkpoint_queue, next_t=5.0)
+jobqueue = updater.job_queue
+checkpoint_queue = Job(notify_checkpoint, 10.0)
+jobqueue.put(checkpoint_queue, next_t=5.0)
 
 updater.start_polling()
 updater.idle()
