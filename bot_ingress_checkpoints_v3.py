@@ -259,7 +259,7 @@ updater.dispatcher.add_handler(CommandHandler('checkpoints', checkpoints))
 
 # JOB QUEUE
 jobqueue = updater.job_queue
-checkpoint_queue = Job(notify_checkpoint, 30.0)
+checkpoint_queue = Job(notify_checkpoint, 10.0)
 jobqueue.put(checkpoint_queue, next_t=5.0)
 
 updater.start_polling()
