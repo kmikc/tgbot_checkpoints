@@ -169,16 +169,17 @@ def checkpoints(bot, update):
 
 
 def notify_checkpoint(bot, job):
-    print "notify_checkpoint"
     if check_checkpoint() == True:
         l_chatid = get_enabled_chat_notification()
         for k_chatid in l_chatid:
-            print "notify_checkpoint: " + str(k_chatid)
-            bot.sendMessage(chat_id=k_chatid, text="CHECKPOINT!")
+            try:
+                bot.sendMessage(chat_id=k_chatid, text="CHECKPOINT!")
+                print "notify_checkpoint: " + str(k_chatid)
+            except Exception as e:
+                print str(k_chatid) + ' ' + str(e)
 
 
 def check_checkpoint():
-    print "check_checkpoint"
     bol_return = False
 
     #chat_id = update.message.chat.id
@@ -198,26 +199,19 @@ def check_checkpoint():
     #next_cycle_utc = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')
     next_cp_utc = row[0]
     next_cycle_utc = row[1]
-    print "next_cp_utc   : ", next_cp_utc
-    print "next_cycle_utc: ", next_cycle_utc
 
     conn.commit()
 
     if utc_now > next_cp_utc:
         next_cp_utc = datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S')
         next_cycle_utc = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')
-        print "utc_now > next_cp_utc"
         bol_return = True
         new_next_cp_utc = next_cp_utc + timedelta(hours=5)
         new_next_cp_utc = str(new_next_cp_utc)
-        print "UPDATE next_cp: ", new_next_cp_utc
 
         query_update = "UPDATE next_notification_utc SET next_cp_utc = '" + new_next_cp_utc + "'"
-        print query_update
         cur.execute(query_update)
-        print "execute!"
         conn.commit()
-        print "commit"
 
     conn.close()
 
@@ -225,11 +219,8 @@ def check_checkpoint():
 
 
 def get_enabled_chat_notification():
-    print "get_enabled_chat_notification"
-    #chat_list = (37307558, -1001055036813)
     query = "SELECT chat_id FROM chat_settings WHERE notify_cp = 1"
     chat_list = []
-    print query
 
     conn = lite.connect('checkpoint_settings.db')
     cur = conn.cursor()
@@ -237,10 +228,7 @@ def get_enabled_chat_notification():
 
     rows = cur.fetchall()
     for row_item in rows:
-        print row_item[0]
         chat_list.append(row_item[0])
-
-    print chat_list
 
     conn.commit()
     conn.close()
