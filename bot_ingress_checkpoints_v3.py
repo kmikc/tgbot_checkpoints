@@ -185,20 +185,18 @@ def check_checkpoint():
     #chat_id = update.message.chat.id
     #gmt_value = get_chat_gmtvalue(chat_id)
 
-    #print gmt_value
     utc_now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     print "utc_now       : ", utc_now
 
-    query = "SELECT next_cp_utc, next_cycle_utc FROM next_notification_utc"
+    query = "SELECT next_cp_utc, next_cycle_utc, next_cp_number FROM next_notification_utc"
     conn = lite.connect("checkpoint_settings.db")
     cur = conn.cursor()
     cur.execute(query)
 
     row = cur.fetchone()
-    #next_cp_utc = datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S')
-    #next_cycle_utc = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')
     next_cp_utc = row[0]
     next_cycle_utc = row[1]
+    next_cp_number = row[2]
 
     conn.commit()
 
@@ -208,8 +206,12 @@ def check_checkpoint():
         bol_return = True
         new_next_cp_utc = next_cp_utc + timedelta(hours=5)
         new_next_cp_utc = str(new_next_cp_utc)
+        new_next_cp_number = next_cp_number + 1
 
-        query_update = "UPDATE next_notification_utc SET next_cp_utc = '" + new_next_cp_utc + "'"
+        if new_next_cp_number > 35:
+            new_next_cp_number = 1
+
+        query_update = "UPDATE next_notification_utc SET next_cp_utc = '" + new_next_cp_utc + "', next_cp_number = " + str(new_next_cp_number)
         cur.execute(query_update)
         conn.commit()
 
