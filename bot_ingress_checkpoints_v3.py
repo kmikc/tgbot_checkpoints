@@ -173,8 +173,11 @@ def notify_checkpoint(bot, job):
         l_chatid = get_enabled_chat_notification()
         for k_chatid in l_chatid:
             try:
-                bot.sendMessage(chat_id=k_chatid, text="CHECKPOINT!")
-                print "notify_checkpoint: " + str(k_chatid)
+                gmt_value = get_chat_gmtvalue(k_chatid)
+                cp_count = get_checkpoint_count()
+
+                bot.sendMessage(chat_id=k_chatid, text="CHECKPOINT! #" + str(cp_count))
+                print "notify_checkpoint: " + str(k_chatid) + " | gmt_value: " + str(gmt_value)
             except Exception as e:
                 print str(k_chatid) + ' ' + str(e)
 
@@ -236,6 +239,27 @@ def get_enabled_chat_notification():
     conn.close()
 
     return chat_list
+
+
+def get_checkpoint_count():
+    query = "SELECT next_cp_number FROM next_notification_utc"
+
+    conn = lite.connect('checkpoint_settings.db')
+    cur = conn.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+
+    cp_count = row[0]
+    conn.commit()
+    conn.close()
+
+    cp_count = cp_count - 1
+
+    if cp_count < 1:
+        cp_count = 35
+
+    return cp_count
+
 
 
 # TOKEN
