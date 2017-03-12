@@ -140,7 +140,7 @@ def checkpoints(bot, update):
     chat_id = update.message.chat.id
     gmt_value = get_chat_gmtvalue(chat_id)
     #t0 = datetime.strptime('2014-07-09 15', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
-    t0 = datetime.strptime('2017-02-25 22', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
+    t0 = datetime.strptime('2017-02-26 03', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
     hours_per_cycle = 175
 
     t = datetime.now()
