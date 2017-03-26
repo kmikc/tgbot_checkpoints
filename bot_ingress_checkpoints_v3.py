@@ -52,6 +52,12 @@ para obtener, por ejemplo el chat id --> update.message.chat.id
 }
 '''
 
+#
+#
+# DEVUELVE EL TIMEZONE GUARDADO, SEGUN EL CHATID
+#
+#
+
 def get_chat_timezone(p_chat_id):
     query = "SELECT timezone FROM chat_settings WHERE chat_id={CHATID};".format(CHATID=p_chat_id)
 
@@ -66,6 +72,12 @@ def get_chat_timezone(p_chat_id):
 
     return str_timezone
 
+
+#
+#
+# DEVUELVE EL VALOR GUARDADO PARA EL GMT, SEGUN EL CHATID
+#
+#
 
 def get_chat_gmtvalue(p_chat_id):
     query = "SELECT gmt_value FROM chat_settings WHERE chat_id={CHATID};".format(CHATID=p_chat_id)
@@ -82,16 +94,34 @@ def get_chat_gmtvalue(p_chat_id):
     return str_timezone
 
 
+#
+#
+# MUESTRA LOS VALORES GUARDADOS EN LA CONFIGURACION DE GMT Y TIMEZONE
+#
+#
+
 def info(bot, update):
     chat_id = update.message.chat.id
     update.message.reply_text("Timezone: " + str(get_chat_timezone(chat_id)))
     update.message.reply_text("GMT: " + str(get_chat_gmtvalue(chat_id)))
 
 
+#
+#
+# MUESTRA TEXTO DE AYUDA
+#
+#
+
 def help(bot, update):
     str_result = '=)'
     update.message.reply_text(str_result)
 
+
+#
+#
+# CONFIGURA EL VALOR DEL GMT, Y LO GUARDA EN DB
+#
+#
 
 def gmt(bot, update, args):
     str_result = 'args: {}'.format(args[0])
@@ -113,7 +143,7 @@ def gmt(bot, update, args):
             cur.execute("SELECT COUNT(*) FROM chat_settings WHERE chat_id=:CHATID", {"CHATID": update.message.chat.id})
             row_count = cur.fetchone()[0]
 
-            # Seg�n resultado obtenido, actualiza o inserta
+            # Segun resultado obtenido, actualiza o inserta
             if row_count > 0:
                 cur.execute("UPDATE chat_settings SET gmt_value=? WHERE chat_id=?", (var_gmt, update.message.chat.id))
                 conn.commit()
@@ -133,13 +163,16 @@ def gmt(bot, update, args):
     update.message.reply_text(str_result)
 
 
+#
+#
+# MUESTRA LISTADO DE CHECKPOINTS PARA EL ACTUAL CICLO
+#
+#
+
 def checkpoints(bot, update):
-    #str_result = '=)'
-    #update.message.reply_text(str_result)
 
     chat_id = update.message.chat.id
     gmt_value = get_chat_gmtvalue(chat_id)
-    #t0 = datetime.strptime('2014-07-09 15', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
     t0 = datetime.strptime('2017-02-26 03', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
     hours_per_cycle = 175
 
@@ -163,30 +196,48 @@ def checkpoints(bot, update):
 
         acheckpoints.append(str_checkpoint)
 
-
     res = ' \n '.join(acheckpoints)
     update.message.reply_text(res)
 
 
+#
+#
+# SE EJECUTA CADA 10 SEGUNDOS PARA VERIFICAR SI YA PASO UN CHECKPOINT
+# Y NOTIFICA A LOS GRUPOS QUE TENGAN HABILITADO
+#
+#
+
 def notify_checkpoint(bot, job):
-    if check_checkpoint() == True:
+    str_check_checkpoint = check_checkpoint()
+    if str_check_checkpoint != '---':
         l_chatid = get_enabled_chat_notification()
         for k_chatid in l_chatid:
             try:
                 gmt_value = get_chat_gmtvalue(k_chatid)
                 cp_count = get_checkpoint_count()
 
-                bot.sendMessage(chat_id=k_chatid, text="CHECKPOINT! #" + str(cp_count))
-                print "notify_checkpoint: " + str(k_chatid) + " | gmt_value: " + str(gmt_value)
+                if str_check_checkpoint == 'CP':
+                    bot.sendMessage(chat_id=k_chatid, text="CHECKPOINT! #" + str(cp_count))
+                    print "notify_checkpoint: " + str(k_chatid) + " | gmt_value: " + str(gmt_value)
+
+                if str_check_checkpoint == 'CYCLE':
+                    bot.sendMessage(chat_id=k_chatid, text="CHECKPOINT! #" + str(cp_count) + ' - FIN DE CICLO!')
+                    print "notify_checkpoint: FIN DE CICLO " + str(k_chatid) + " | gmt_value: " + str(gmt_value)
+
             except Exception as e:
                 print str(k_chatid) + ' ' + str(e)
 
 
-def check_checkpoint():
-    bol_return = False
+#
+#
+# COMPARA LA FECHA Y HORA ACTUAL (EN UTC) CON LA FECHA Y HORA GUARDADA PARA EL PROXIMO CHECKPOINT
+# SI FECHA Y HORA ACTUAL ES MAYOR, ACTUALIZA EN 5 HORAS MAS EL PROXIMO CHECKPOINT
+# Y DEVUELVE "TRUE", DE LO CONTRARIO DEVUELVE "FALSE"
+#
+#
 
-    #chat_id = update.message.chat.id
-    #gmt_value = get_chat_gmtvalue(chat_id)
+def check_checkpoint():
+    str_return = '---'
 
     utc_now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     print "utc_now       : ", utc_now
@@ -206,13 +257,20 @@ def check_checkpoint():
     if utc_now > next_cp_utc:
         next_cp_utc = datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S')
         next_cycle_utc = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')
-        bol_return = True
+        str_return = 'CP'
         new_next_cp_utc = next_cp_utc + timedelta(hours=5)
         new_next_cp_utc = str(new_next_cp_utc)
         new_next_cp_number = next_cp_number + 1
 
+        # Fin de ciclo?
         if new_next_cp_number > 35:
             new_next_cp_number = 1
+            new_next_cycle_utc = next_cycle_utc + timedelta(hours=175)
+            new_next_cycle_utc = str(new_next_cycle_utc)
+            query_update = "UPDATE next_notification_utc SET next_cycle_utc = '" + new_next_cycle_utc + "'"
+            cur.execute(query_update)
+            conn.commit()
+            str_return = 'CYCLE'
 
         query_update = "UPDATE next_notification_utc SET next_cp_utc = '" + new_next_cp_utc + "', next_cp_number = " + str(new_next_cp_number)
         cur.execute(query_update)
@@ -220,8 +278,16 @@ def check_checkpoint():
 
     conn.close()
 
-    return bol_return
+    return str_return
 
+
+#
+#
+# RECORRE LA LISTA DE CHATS QUE ESTAN ALMACENADOS
+# Y REVISA SI TIENEN HABILITA LA OPCION PARA NOTIFICAR EL CHECKPOINT
+# DEVUELVE "TRUE" O "FALSE" SEGUN SEA EL CASO
+#
+#
 
 def get_enabled_chat_notification():
     query = "SELECT chat_id FROM chat_settings WHERE notify_cp = 1"
@@ -241,6 +307,12 @@ def get_enabled_chat_notification():
     return chat_list
 
 
+#
+#
+# MUESTRA EL ACTUAL NUMERO DE CHECKPOINT, RESTANDO 1 AL NUMERO GUARDADO (Mejorar esto)
+#
+#
+
 def get_checkpoint_count():
     query = "SELECT next_cp_number FROM next_notification_utc"
 
@@ -259,7 +331,6 @@ def get_checkpoint_count():
         cp_count = 35
 
     return cp_count
-
 
 
 # TOKEN
