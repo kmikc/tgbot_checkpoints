@@ -334,7 +334,8 @@ def get_checkpoint_count():
 
 
 # TOKEN
-updater = Updater('140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY')
+token = open('token').read().rstrip('\n')
+updater = Updater(token)
 
 # COMANDOS
 updater.dispatcher.add_handler(CommandHandler('info', info))
