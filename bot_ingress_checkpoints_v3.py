@@ -176,7 +176,7 @@ def checkpoints(bot, update):
     t0 = datetime.strptime('2017-02-26 03', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
     hours_per_cycle = 175
 
-    t = datetime.now()
+    t = datetime.now() + timedelta(hours=gmt_value)
     print t
 
     seconds = mktime(t.timetuple()) - mktime(t0.timetuple())
