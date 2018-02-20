@@ -1,14 +1,13 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import telebot
-import logging
+import requests
+
+from time import mktime
 from unicodedata import normalize
 from datetime import datetime, timedelta
-from time import mktime
 import sqlite3 as lite
-import sys
 
 bot = telebot.TeleBot("140837439:AAFR0JP70z5QsNmKB60aX_mEfbfrtkdQ8wY")
+
 
 def get_gmt(p_chat_id, p_chat_title, p_chat_username):
     conn = lite.connect('gmt.db')
@@ -44,8 +43,7 @@ def send_welcome(message):
         try:
             var_gmt = int(message.text.replace("/gmt ", ""))
             ok = True
-
-        except:
+        except ValueError:
             resp = "Valor no numérico"
             ok = False
 
@@ -94,7 +92,7 @@ def send_welcome(message):
         acheckpoints = []
         for num, checkpoint in enumerate(checkpoints):
 
-            if checkpoint > t and nextcp_mark == False:
+            if checkpoint > t and nextcp_mark is False:
                 str_checkpoint = format(str(checkpoint)) + ' <---'
                 nextcp_mark = True
             else:
@@ -102,20 +100,13 @@ def send_welcome(message):
 
             acheckpoints.append(str_checkpoint)
 
-
         res = ' \n '.join(acheckpoints)
         bot.reply_to(message, res)
 
-#
-# FILTRAR MENSAJES "proximo cp"... etc.
-#
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
-    #logging.basicConfig(filename='bot_ingress_checkpoints.log', filemode='w', level=logging.DEBUG)
-    #logging.info(message)
 
-    #text = message.text
     text = normalize('NFKD', message.text).encode('ASCII', 'ignore')
     mensajes_cp = [u'proximo cp', u'siguiente cp', u'proximo checkpoint', u'siguiente checkpoint', u'proximo check point', u'siguiente check point']
     mensajes_ciclo = [u'fin de ciclo', u'fin del ciclo', u'final de ciclo', u'final del ciclo', u'proximo ciclo', u'siguiente ciclo', u'ciclo nuevo', u'nuevo ciclo']
@@ -165,10 +156,6 @@ def echo_all(message):
 while True:
     try:
         bot.polling(none_stop=True)
-    except request.exceptions.ConnectionError as e:
+    except requests.exceptions.ConnectionError as e:
         print ('ERROR')
         print datetime.now()
-#        print >> sys.stderr, str(e)
-#        time.sleep(15)
-
-#bot.polling(none_stop=True)

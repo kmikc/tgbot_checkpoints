@@ -1,1 +1,2 @@
-# tg-ingress-cp-bot
+# Ingress Checkpoints bot
+
