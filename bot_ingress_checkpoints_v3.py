@@ -177,7 +177,7 @@ def checkpoints(bot, update):
     t0 = datetime.strptime('2017-02-26 03', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
     hours_per_cycle = 175
 
-    t = datetime.now()
+    t = datetime.now() + timedelta(hours=gmt_value)
     print t
 
     seconds = mktime(t.timetuple()) - mktime(t0.timetuple())
@@ -243,7 +243,7 @@ def check_checkpoint():
     utc_now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     print "utc_now       : ", utc_now
 
-    query = "SELECT next_cp_utc, next_cycle_utc, next_cp_number FROM next_notification_utc"
+    query = "SELECT next_cp_utc, next_cycle_utc, next_cp_number, cycle_year, cycle_number FROM next_notification_utc"
     conn = lite.connect("checkpoint_settings.db")
     cur = conn.cursor()
     cur.execute(query)
@@ -252,6 +252,8 @@ def check_checkpoint():
     next_cp_utc = row[0]
     next_cycle_utc = row[1]
     next_cp_number = row[2]
+    current_cycle_year = row[3]
+    current_cycle_number = row[4]
 
     conn.commit()
 
@@ -268,9 +270,24 @@ def check_checkpoint():
             new_next_cp_number = 1
             new_next_cycle_utc = next_cycle_utc + timedelta(hours=175)
             new_next_cycle_utc = str(new_next_cycle_utc)
+
+            current_cycle_number += 1
+            if current_cycle_number > 50:
+                current_cycle_number = 1
+                current_cycle_year += 1
+
             query_update = "UPDATE next_notification_utc SET next_cycle_utc = '" + new_next_cycle_utc + "'"
             cur.execute(query_update)
             conn.commit()
+
+            query_update = "UPDATE next_notification_utc SET current_cycle_year = '" + current_cycle_year + "'"
+            cur.execute(query_update)
+            conn.commit()
+
+            query_update = "UPDATE next_notification_utc SET current_cycle_number = '" + current_cycle_number + "'"
+            cur.execute(query_update)
+            conn.commit()
+
             str_return = 'CYCLE'
 
         query_update = "UPDATE next_notification_utc SET next_cp_utc = '" + new_next_cp_utc + "', next_cp_number = " + str(new_next_cp_number)
