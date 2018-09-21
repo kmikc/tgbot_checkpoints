@@ -104,6 +104,7 @@ def info(bot, update):
     chat_id = update.message.chat.id
     update.message.reply_text("Timezone: " + str(get_chat_timezone(chat_id)))
     update.message.reply_text("GMT: " + str(get_chat_gmtvalue(chat_id)))
+    update.message.reply_text("Chat id: " + str(chat_id))
 
 
 #
@@ -333,6 +334,63 @@ def get_checkpoint_count():
     return cp_count
 
 
+#
+#
+# CONFIGURA EL VALOR PARA COLUMNA DE NOTIFICACION, PARA RECIBIR AVISOS EN CADA CHECKPOINT
+#
+#
+
+def notify(bot, update, args):
+    print "notify"
+    str_result = 'args: {}'.format(args[0])
+    int_notify = 0
+    print str_result
+    try:
+        var_notify = args[0]
+        of = True
+        if var_notify == 'on' or var_notify == 'off':
+            int_notify = 1
+        else:
+            int_notify = 0
+
+    except:
+        str_result = "No se confguró nada"
+        ok = False
+
+    print var_notify
+    print int_notify
+
+    if ok:
+        print "ok"
+        conn = None
+        try:
+            conn = lite.connect('checkpoint_settings.db')
+            cur = conn.cursor()
+
+            # Cuenta regstros existentes
+            cur.execute("SELECT COUNT(*) FROM chat_settings WHERE chat_id=:CHATID", {"CHATID": update.message.chat.id})
+            row_count = cur.fetchone()[0]
+
+            # Segun resultado obtenido, actualiza o inserta
+            if row_count > 0:
+                cur.execute("UPDATE chat_settings SET notify_cp=? WHERE chat_id=?", (int_notify, update.message.chat.id))
+                conn.commit()
+                str_result = 'Registro actualizado'
+            else:
+                cur.execute("INSERT INTO chat_settings (chat_id, notify_cp) VALUES (?, ?)", (update.message.chat.id, int_notify))
+                conn.commit()
+                str_result = 'Registro ingresado'
+
+        except:
+            str_result = 'No se pudo conectar'
+
+        finally:
+            if conn:
+                conn.close()
+
+    update.message.reply_text(str_result)
+
+
 # TOKEN
 token = open('token').read().rstrip('\n')
 updater = Updater(token)
@@ -342,6 +400,7 @@ updater.dispatcher.add_handler(CommandHandler('info', info))
 updater.dispatcher.add_handler(CommandHandler('help', help))
 updater.dispatcher.add_handler(CommandHandler('gmt', gmt, pass_args=True))
 updater.dispatcher.add_handler(CommandHandler('checkpoints', checkpoints))
+updater.dispatcher.add_handler(CommandHandler('notify', notify, pass_args=True))
 
 # JOB QUEUE
 jobqueue = updater.job_queue
