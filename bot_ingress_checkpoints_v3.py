@@ -212,7 +212,11 @@ def checkpoints(bot, update):
     for num, checkpoint in enumerate(checkpoints):
 
         if checkpoint > t and nextcp_mark == False:
-            str_checkpoint = '#' + format(i) + ' - [ [ ' + format(str(checkpoint)) + ' ] ]'
+            str_checkpoint = '- - - - - - - - - - - - - - - - - - - - - - -'
+            acheckpoints.append(str_checkpoint)
+            str_checkpoint = '#' + format(i) + ' - ' + format(str(checkpoint))
+            acheckpoints.append(str_checkpoint)
+            str_checkpoint = '- - - - - - - - - - - - - - - - - - - - - - -'
             nextcp_mark = True
         else:
             str_checkpoint = '#' + format(i) + ' - ' + format(str(checkpoint))
