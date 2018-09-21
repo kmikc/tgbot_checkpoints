@@ -179,6 +179,13 @@ def checkpoints(bot, update):
 
     t = datetime.now() + timedelta(hours=gmt_value)
     print t
+    #
+    # TO DO:
+    #
+    # Usar los tiempos de checkpoints en UTC, porque en el server da una hora,
+    # y en local, a la hora le resta el gmt_value
+    # Provocando una diferencia cuando se muestran los checkpoints local vs server
+    #
 
     seconds = mktime(t.timetuple()) - mktime(t0.timetuple())
     cycles = seconds // (3600 * hours_per_cycle)
@@ -186,15 +193,31 @@ def checkpoints(bot, update):
     checkpoints = map(lambda x: start + timedelta(hours=x), range(0, hours_per_cycle, 5))
     nextcp_mark = False
 
+    # Busco el año y número de ciclo en curso
+    query = "SELECT cycle_year, cycle_number FROM next_notification_utc"
+    conn = lite.connect("checkpoint_settings.db")
+    cur = conn.cursor()
+    cur.execute(query)
+
+    row = cur.fetchone()
+    current_cycle_year = row[0]
+    current_cycle_number = row[1]
+
     acheckpoints = []
+
+    str_checkpoint = "Ciclo en curso: " + format(current_cycle_year) + "." + format(current_cycle_number)
+    acheckpoints.append(str_checkpoint)
+
+    i = 1
     for num, checkpoint in enumerate(checkpoints):
 
         if checkpoint > t and nextcp_mark == False:
-            str_checkpoint = format(str(checkpoint)) + ' <---'
+            str_checkpoint = '#' + format(i) + ' - [ [ ' + format(str(checkpoint)) + ' ] ]'
             nextcp_mark = True
         else:
-            str_checkpoint = format(str(checkpoint))
+            str_checkpoint = '#' + format(i) + ' - ' + format(str(checkpoint))
 
+        i += 1
         acheckpoints.append(str_checkpoint)
 
     res = ' \n '.join(acheckpoints)
@@ -217,12 +240,22 @@ def notify_checkpoint(bot, job):
                 gmt_value = get_chat_gmtvalue(k_chatid)
                 cp_count = get_checkpoint_count()
 
+                # Busco año y ciclo en curso
+                query = "SELECT cycle_year, cycle_number FROM next_notification_utc"
+                conn = lite.connect("checkpoint_settings.db")
+                cur = conn.cursor()
+                cur.execute(query)
+
+                row = cur.fetchone()
+                current_cycle_year = row[0]
+                current_cycle_number = row[1]
+
                 if str_check_checkpoint == 'CP':
-                    bot.sendMessage(chat_id=k_chatid, text="CHECKPOINT! #" + str(cp_count))
+                    bot.sendMessage(chat_id=k_chatid, text=str(current_cycle_year) + "." + str(current_cycle_number) + " - CHECKPOINT! #" + str(cp_count))
                     print "notify_checkpoint: " + str(k_chatid) + " | gmt_value: " + str(gmt_value)
 
                 if str_check_checkpoint == 'CYCLE':
-                    bot.sendMessage(chat_id=k_chatid, text="CHECKPOINT! #" + str(cp_count) + ' - FIN DE CICLO!')
+                    bot.sendMessage(chat_id=k_chatid, text=str(current_cycle_year) + "." + str(current_cycle_number) + " - CHECKPOINT! #" + str(cp_count) + ' - FIN DE CICLO!')
                     print "notify_checkpoint: FIN DE CICLO " + str(k_chatid) + " | gmt_value: " + str(gmt_value)
 
             except Exception as e:
@@ -364,11 +397,22 @@ def notify(bot, update, args):
     print str_result
     try:
         var_notify = args[0]
-        of = True
-        if var_notify == 'on' or var_notify == 'off':
+        print var_notify
+        ok = False
+
+        if var_notify == 'on':
             int_notify = 1
-        else:
+            str_result = 'Notificaciones de checkpoints activadas'
+            ok = True
+
+        if var_notify == 'off':
             int_notify = 0
+            str_result = 'Notificaciones de checkpoints desactivadas'
+            ok = True
+
+        if var_notify != 'on' and var_notify != 'off':
+            str_result = 'Parámetros aceptados: "/notify on" o "/notify off"'
+            ok = False
 
     except:
         str_result = "No se confguró nada"
@@ -388,15 +432,17 @@ def notify(bot, update, args):
             cur.execute("SELECT COUNT(*) FROM chat_settings WHERE chat_id=:CHATID", {"CHATID": update.message.chat.id})
             row_count = cur.fetchone()[0]
 
+            print "row_count: ", row_count
+
             # Segun resultado obtenido, actualiza o inserta
             if row_count > 0:
+                print "update: ", update.message.chat_id, " int_notify: ", int_notify
                 cur.execute("UPDATE chat_settings SET notify_cp=? WHERE chat_id=?", (int_notify, update.message.chat.id))
                 conn.commit()
-                str_result = 'Registro actualizado'
             else:
+                print "insert ", update.message.chat_id
                 cur.execute("INSERT INTO chat_settings (chat_id, notify_cp) VALUES (?, ?)", (update.message.chat.id, int_notify))
                 conn.commit()
-                str_result = 'Registro ingresado'
 
         except:
             str_result = 'No se pudo conectar'
