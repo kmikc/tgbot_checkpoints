@@ -313,15 +313,8 @@ def check_checkpoint():
                 current_cycle_number = 1
                 current_cycle_year += 1
 
-            query_update = "UPDATE next_notification_utc SET next_cycle_utc = '" + new_next_cycle_utc + "'"
-            cur.execute(query_update)
-            conn.commit()
-
-            query_update = "UPDATE next_notification_utc SET current_cycle_year = '" + current_cycle_year + "'"
-            cur.execute(query_update)
-            conn.commit()
-
-            query_update = "UPDATE next_notification_utc SET current_cycle_number = '" + current_cycle_number + "'"
+            #query_update = "UPDATE next_notification_utc SET next_cycle_utc = '" + new_next_cycle_utc + "'"
+            query_update = "UPDATE next_notification_utc SET next_cycle_utc = '" + new_next_cycle_utc + "', cycle_year = " + str(current_cycle_year) + ", cycle_number = " + str(current_cycle_number)
             cur.execute(query_update)
             conn.commit()
 
