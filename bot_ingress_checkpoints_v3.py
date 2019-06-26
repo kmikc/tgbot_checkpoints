@@ -178,7 +178,7 @@ def checkpoints(bot, update):
     hours_per_cycle = 175
 
     t = datetime.now() + timedelta(hours=gmt_value)
-    print t
+    print(t)
     #
     # TO DO:
     #
@@ -256,14 +256,14 @@ def notify_checkpoint(bot, job):
 
                 if str_check_checkpoint == 'CP':
                     bot.sendMessage(chat_id=k_chatid, text=str(current_cycle_year) + "." + str(current_cycle_number) + " - CHECKPOINT! #" + str(cp_count))
-                    print "notify_checkpoint: " + str(k_chatid) + " | gmt_value: " + str(gmt_value)
+                    print("notify_checkpoint: " + str(k_chatid) + " | gmt_value: " + str(gmt_value))
 
                 if str_check_checkpoint == 'CYCLE':
                     bot.sendMessage(chat_id=k_chatid, text=str(current_cycle_year) + "." + str(current_cycle_number) + " - CHECKPOINT! #" + str(cp_count) + ' - FIN DE CICLO!')
-                    print "notify_checkpoint: FIN DE CICLO " + str(k_chatid) + " | gmt_value: " + str(gmt_value)
+                    print("notify_checkpoint: FIN DE CICLO " + str(k_chatid) + " | gmt_value: " + str(gmt_value))
 
             except Exception as e:
-                print str(k_chatid) + ' ' + str(e)
+                print(str(k_chatid) + ' ' + str(e))
 
 
 #
@@ -278,7 +278,7 @@ def check_checkpoint():
     str_return = '---'
 
     utc_now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-    print "utc_now       : ", utc_now
+    print("utc_now       : ", utc_now)
 
     query = "SELECT next_cp_utc, next_cycle_utc, next_cp_number, cycle_year, cycle_number FROM next_notification_utc"
     conn = lite.connect("checkpoint_settings.db")
@@ -388,13 +388,13 @@ def get_checkpoint_count():
 #
 
 def notify(bot, update, args):
-    print "notify"
+    print("notify")
     str_result = 'args: {}'.format(args[0])
     int_notify = 0
-    print str_result
+    print(str_result)
     try:
         var_notify = args[0]
-        print var_notify
+        print(var_notify)
         ok = False
 
         if var_notify == 'on':
@@ -415,11 +415,11 @@ def notify(bot, update, args):
         str_result = "No se confguró nada"
         ok = False
 
-    print var_notify
-    print int_notify
+    print(var_notify)
+    print(int_notify)
 
     if ok:
-        print "ok"
+        print("ok")
         conn = None
         try:
             conn = lite.connect('checkpoint_settings.db')
@@ -429,15 +429,15 @@ def notify(bot, update, args):
             cur.execute("SELECT COUNT(*) FROM chat_settings WHERE chat_id=:CHATID", {"CHATID": update.message.chat.id})
             row_count = cur.fetchone()[0]
 
-            print "row_count: ", row_count
+            print("row_count: ", row_count)
 
             # Segun resultado obtenido, actualiza o inserta
             if row_count > 0:
-                print "update: ", update.message.chat_id, " int_notify: ", int_notify
+                print("update: ", update.message.chat_id, " int_notify: ", int_notify)
                 cur.execute("UPDATE chat_settings SET notify_cp=? WHERE chat_id=?", (int_notify, update.message.chat.id))
                 conn.commit()
             else:
-                print "insert ", update.message.chat_id
+                print("insert ", update.message.chat_id)
                 cur.execute("INSERT INTO chat_settings (chat_id, notify_cp) VALUES (?, ?)", (update.message.chat.id, int_notify))
                 conn.commit()
 
