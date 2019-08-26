@@ -133,7 +133,7 @@ def gmt(bot, update, args):
         var_gmt = int(args[0])
         ok = True
 
-    except:
+    except ValueError:
         str_result = "Valor no numérico"
         ok = False
 
@@ -238,14 +238,11 @@ def checkpoints(bot, update):
     update.message.reply_text(res)
 
 
-#
-#
-# SE EJECUTA CADA 10 SEGUNDOS PARA VERIFICAR SI YA PASO UN CHECKPOINT
-# Y NOTIFICA A LOS GRUPOS QUE TENGAN HABILITADO
-#
-#
-
 def notify_checkpoint(bot, job):
+    """
+    SE EJECUTA CADA 10 SEGUNDOS PARA VERIFICAR SI YA PASO UN CHECKPOINT
+    Y NOTIFICA A LOS GRUPOS QUE TENGAN HABILITADO
+    """
     str_check_checkpoint = check_checkpoint()
     if str_check_checkpoint != '---':
         l_chatid = get_enabled_chat_notification()
@@ -277,17 +274,14 @@ def notify_checkpoint(bot, job):
                 print(str(k_chatid) + ' ' + str(e))
 
 
-#
-#
-# COMPARA LA FECHA Y HORA ACTUAL (EN UTC) CON
-# LA FECHA Y HORA GUARDADA PARA EL PROXIMO CHECKPOINT
-# SI FECHA Y HORA ACTUAL ES MAYOR, ACTUALIZA EN
-# 5 HORAS MAS EL PROXIMO CHECKPOINT
-# Y DEVUELVE "TRUE", DE LO CONTRARIO DEVUELVE "FALSE"
-#
-#
-
 def check_checkpoint():
+    """
+    COMPARA LA FECHA Y HORA ACTUAL (EN UTC) CON LA FECHA Y HORA GUARDADA
+    PARA EL PROXIMO CHECKPOINT SI FECHA Y HORA ACTUAL ES MAYOR, ACTUALIZA
+    EN 5 HORAS MAS EL PROXIMO CHECKPOINT Y DEVUELVE "TRUE",
+    DE LO CONTRARIO DEVUELVE "FALSE"
+    """
+
     str_return = '---'
 
     utc_now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
