@@ -1,4 +1,7 @@
-from peewee import SqliteDatabase, Model, IntegerField
+import datetime
+
+from peewee import (SqliteDatabase, Model, IntegerField,
+                    DateTimeField)
 
 db = SqliteDatabase('checkpoint_settings.db')
 
@@ -9,22 +12,28 @@ class BaseModel(Model):
         database = db
 
 
-class ChatSettings(BaseModel):
+class BotSettings(BaseModel):
 
     id = IntegerField(primary_key=True)
-    # chat_id
-    # gmt_value
+    chat_id = IntegerField()
+    gmt_value = IntegerField()
+    notify_cp = IntegerField()
+    datetime = DateTimeField(default=datetime.datetime.now)
+    # chat_type = CharField()
+    # chat_title = CharField()
+    # chat_username = CharField()
 
     class Meta:
-        table_name = 'chat_settings'
+        table_name = 'bot_settings'
 
 
-class NextNotification(BaseModel):
+class CycleSettings(BaseModel):
 
     id = IntegerField(primary_key=True)
-    # next_cp_utc
-    # next_cycle_utc
-    # next_cp_number
+    # next_cp_utc = DateTimeField()
+    # next_cycle_utc = DateTimeField()
+    # current_cp_number = IntegerField()
+    # next_cp_number = IntegerField()
 
     class Meta:
-        table_name = 'next_notification_utc'
+        table_name = 'cycle_settings'
