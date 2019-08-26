@@ -58,8 +58,10 @@ para obtener, por ejemplo el chat id --> update.message.chat.id
 #
 #
 
+
 def get_chat_timezone(p_chat_id):
-    query = "SELECT timezone FROM chat_settings WHERE chat_id={CHATID};".format(CHATID=p_chat_id)
+    query = "SELECT timezone FROM chat_settings WHERE chat_id={CHATID};".\
+        format(CHATID=p_chat_id)
 
     conn = lite.connect('checkpoint_settings.db')
     cur = conn.cursor()
@@ -80,7 +82,8 @@ def get_chat_timezone(p_chat_id):
 #
 
 def get_chat_gmtvalue(p_chat_id):
-    query = "SELECT gmt_value FROM chat_settings WHERE chat_id={CHATID};".format(CHATID=p_chat_id)
+    query = "SELECT gmt_value FROM chat_settings WHERE chat_id={CHATID};".\
+        format(CHATID=p_chat_id)
 
     conn = lite.connect('checkpoint_settings.db')
     cur = conn.cursor()
@@ -141,16 +144,19 @@ def gmt(bot, update, args):
             cur = conn.cursor()
 
             # Cuenta regstros existentes
-            cur.execute("SELECT COUNT(*) FROM chat_settings WHERE chat_id=:CHATID", {"CHATID": update.message.chat.id})
+            cur.execute("SELECT COUNT(*) FROM chat_settings WHERE\
+                chat_id=:CHATID", {"CHATID": update.message.chat.id})
             row_count = cur.fetchone()[0]
 
             # Segun resultado obtenido, actualiza o inserta
             if row_count > 0:
-                cur.execute("UPDATE chat_settings SET gmt_value=? WHERE chat_id=?", (var_gmt, update.message.chat.id))
+                cur.execute("UPDATE chat_settings SET gmt_value=? WHERE\
+                    chat_id=?", (var_gmt, update.message.chat.id))
                 conn.commit()
                 str_result = 'Registro actualizado'
             else:
-                cur.execute("INSERT INTO chat_settings (chat_id, gmt_value) VALUES (?, ?)", (update.message.chat.id, var_gmt))
+                cur.execute("INSERT INTO chat_settings (chat_id, gmt_value)\
+                    VALUES (?, ?)", (update.message.chat.id, var_gmt))
                 conn.commit()
                 str_result = 'Registro ingresado'
 
@@ -174,7 +180,8 @@ def checkpoints(bot, update):
 
     chat_id = update.message.chat.id
     gmt_value = get_chat_gmtvalue(chat_id)
-    t0 = datetime.strptime('2017-02-26 03', '%Y-%m-%d %H') + timedelta(hours=gmt_value)
+    t0 = datetime.strptime('2017-02-26 03', '%Y-%m-%d %H') +\
+        timedelta(hours=gmt_value)
     hours_per_cycle = 175
 
     t = datetime.now() + timedelta(hours=gmt_value)
@@ -184,13 +191,15 @@ def checkpoints(bot, update):
     #
     # Usar los tiempos de checkpoints en UTC, porque en el server da una hora,
     # y en local, a la hora le resta el gmt_value
-    # Provocando una diferencia cuando se muestran los checkpoints local vs server
+    # Provocando una diferencia cuando se muestran
+    # los checkpoints local vs server
     #
 
     seconds = mktime(t.timetuple()) - mktime(t0.timetuple())
     cycles = seconds // (3600 * hours_per_cycle)
     start = t0 + timedelta(hours=cycles * hours_per_cycle)
-    checkpoints = map(lambda x: start + timedelta(hours=x), range(0, hours_per_cycle, 5))
+    checkpoints = map(lambda x: start + timedelta(hours=x),
+                      range(0, hours_per_cycle, 5))
     nextcp_mark = False
 
     # Busco el año y número de ciclo en curso
@@ -205,13 +214,14 @@ def checkpoints(bot, update):
 
     acheckpoints = []
 
-    str_checkpoint = "Ciclo en curso: " + format(current_cycle_year) + "." + format(current_cycle_number)
+    str_checkpoint = "Ciclo en curso: " + format(current_cycle_year) +\
+        "." + format(current_cycle_number)
     acheckpoints.append(str_checkpoint)
 
     i = 1
     for num, checkpoint in enumerate(checkpoints):
 
-        if checkpoint > t and nextcp_mark == False:
+        if checkpoint > t and nextcp_mark is False:
             str_checkpoint = '- - - - - - - - - - - - - - - - - - - - - - -'
             acheckpoints.append(str_checkpoint)
             str_checkpoint = '#' + format(i) + ' - ' + format(str(checkpoint))
@@ -245,7 +255,8 @@ def notify_checkpoint(bot, job):
                 cp_count = get_checkpoint_count()
 
                 # Busco año y ciclo en curso
-                query = "SELECT cycle_year, cycle_number FROM next_notification_utc"
+                query = "SELECT cycle_year, cycle_number FROM\
+                    next_notification_utc"
                 conn = lite.connect("checkpoint_settings.db")
                 cur = conn.cursor()
                 cur.execute(query)
@@ -268,8 +279,10 @@ def notify_checkpoint(bot, job):
 
 #
 #
-# COMPARA LA FECHA Y HORA ACTUAL (EN UTC) CON LA FECHA Y HORA GUARDADA PARA EL PROXIMO CHECKPOINT
-# SI FECHA Y HORA ACTUAL ES MAYOR, ACTUALIZA EN 5 HORAS MAS EL PROXIMO CHECKPOINT
+# COMPARA LA FECHA Y HORA ACTUAL (EN UTC) CON
+# LA FECHA Y HORA GUARDADA PARA EL PROXIMO CHECKPOINT
+# SI FECHA Y HORA ACTUAL ES MAYOR, ACTUALIZA EN
+# 5 HORAS MAS EL PROXIMO CHECKPOINT
 # Y DEVUELVE "TRUE", DE LO CONTRARIO DEVUELVE "FALSE"
 #
 #
@@ -280,7 +293,8 @@ def check_checkpoint():
     utc_now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     print("utc_now       : ", utc_now)
 
-    query = "SELECT next_cp_utc, next_cycle_utc, next_cp_number, cycle_year, cycle_number FROM next_notification_utc"
+    query = "SELECT next_cp_utc, next_cycle_utc, next_cp_number, cycle_year,\
+        cycle_number FROM next_notification_utc"
     conn = lite.connect("checkpoint_settings.db")
     cur = conn.cursor()
     cur.execute(query)
@@ -313,7 +327,6 @@ def check_checkpoint():
                 current_cycle_number = 1
                 current_cycle_year += 1
 
-            #query_update = "UPDATE next_notification_utc SET next_cycle_utc = '" + new_next_cycle_utc + "'"
             query_update = "UPDATE next_notification_utc SET next_cycle_utc = '" + new_next_cycle_utc + "', cycle_year = " + str(current_cycle_year) + ", cycle_number = " + str(current_cycle_number)
             cur.execute(query_update)
             conn.commit()
@@ -357,7 +370,8 @@ def get_enabled_chat_notification():
 
 #
 #
-# MUESTRA EL ACTUAL NUMERO DE CHECKPOINT, RESTANDO 1 AL NUMERO GUARDADO (Mejorar esto)
+# MUESTRA EL ACTUAL NUMERO DE CHECKPOINT,
+# RESTANDO 1 AL NUMERO GUARDADO (Mejorar esto)
 #
 #
 
@@ -383,7 +397,8 @@ def get_checkpoint_count():
 
 #
 #
-# CONFIGURA EL VALOR PARA COLUMNA DE NOTIFICACION, PARA RECIBIR AVISOS EN CADA CHECKPOINT
+# CONFIGURA EL VALOR PARA COLUMNA DE NOTIFICACION,
+# PARA RECIBIR AVISOS EN CADA CHECKPOINT
 #
 #
 
@@ -460,7 +475,8 @@ updater.dispatcher.add_handler(CommandHandler('info', info))
 updater.dispatcher.add_handler(CommandHandler('help', help))
 updater.dispatcher.add_handler(CommandHandler('gmt', gmt, pass_args=True))
 updater.dispatcher.add_handler(CommandHandler('checkpoints', checkpoints))
-updater.dispatcher.add_handler(CommandHandler('notify', notify, pass_args=True))
+updater.dispatcher.add_handler(
+    CommandHandler('notify', notify, pass_args=True))
 
 # JOB QUEUE
 jobqueue = updater.job_queue
