@@ -105,7 +105,7 @@ def get_chat_gmtvalue(p_chat_id):
 
 def info(bot, update):
     chat_id = update.message.chat.id
-    update.message.reply_text("Timezone: " + str(get_chat_timezone(chat_id)))
+    # update.message.reply_text("Timezone: " + str(get_chat_timezone(chat_id)))
     update.message.reply_text("GMT: " + str(get_chat_gmtvalue(chat_id)))
     update.message.reply_text("Chat id: " + str(chat_id))
 
